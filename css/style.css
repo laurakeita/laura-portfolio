@@ -1300,10 +1300,10 @@ section { scroll-margin-top: var(--nav-h); }
 .growth-panel-left {
   width: clamp(210px, 22vw, 290px);
   flex-shrink: 0;
-  padding: 3rem 2rem 3rem clamp(1.5rem, 5vw, 4rem);
+  padding: clamp(2rem, 4vw, 3rem) 2rem 3rem clamp(1.5rem, 5vw, 4rem);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.6rem;
   border-right: 1px solid var(--border);
 }
@@ -1379,6 +1379,29 @@ section { scroll-margin-top: var(--nav-h); }
   min-height: 210px;
   color: #fff;
   gap: 0;
+}
+
+/* White/light variant (alternating cards) */
+.growth-vcard-top--light {
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--blue-border);
+  color: var(--text);
+}
+
+.growth-vcard-top--light .growth-vcard-metric {
+  color: var(--blue);
+}
+
+.growth-vcard-top--light .growth-vcard-metric-label {
+  color: var(--text-muted);
+}
+
+.growth-vcard-top--light .growth-vcard-co {
+  color: var(--text);
+}
+
+.growth-vcard-top--light .growth-vcard-role {
+  color: var(--text-muted);
 }
 
 .growth-vcard-metric {
