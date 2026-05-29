@@ -1355,7 +1355,7 @@ section { scroll-margin-top: var(--nav-h); }
 .growth-carousel::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 2px; }
 
 .growth-vcard {
-  flex: 0 0 300px;
+  flex: 0 0 360px;
   scroll-snap-align: start;
   background: var(--bg-white);
   border: 1px solid var(--border);
@@ -1364,7 +1364,6 @@ section { scroll-margin-top: var(--nav-h); }
   display: flex;
   flex-direction: column;
   transition: box-shadow var(--transition), transform var(--transition);
-  align-self: stretch;
 }
 
 .growth-vcard:hover {
@@ -1414,7 +1413,6 @@ section { scroll-margin-top: var(--nav-h); }
 
 .growth-vcard-bottom {
   padding: 1.5rem 1.75rem 1.75rem;
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -1433,12 +1431,85 @@ section { scroll-margin-top: var(--nav-h); }
   color: var(--text-muted);
 }
 
+.growth-vcard-desc-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
 .growth-vcard-desc {
   font-size: 13px;
   color: var(--text-light);
   line-height: 1.65;
   font-style: italic;
-  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.growth-vcard.expanded .growth-vcard-desc {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.growth-vcard-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  cursor: pointer;
+  text-align: left;
+  letter-spacing: 0.01em;
+  transition: opacity var(--transition);
+}
+
+.growth-vcard-toggle:hover { opacity: 0.7; }
+
+.growth-vcard-impact {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.growth-vcard-impact-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
+}
+
+.growth-vcard-impact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.growth-vcard-impact-list li {
+  font-size: 12.5px;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.45;
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.growth-vcard-impact-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--blue);
+  font-size: 11px;
+  line-height: 1.6;
 }
 
 .growth-vcard-tags {
@@ -1638,7 +1709,7 @@ section { scroll-margin-top: var(--nav-h); }
    RESPONSIVE — NEW SECTIONS
    ============================================================ */
 @media (max-width: 960px) {
-  .growth-vcard { flex: 0 0 280px; }
+  .growth-vcard { flex: 0 0 320px; }
   .growth-panel-left { width: clamp(190px, 20vw, 250px); }
   .brand-collage { min-height: 480px; }
   .bci-0 { width: clamp(200px, 30%, 278px); }
@@ -1700,6 +1771,6 @@ section { scroll-margin-top: var(--nav-h); }
 }
 
 @media (max-width: 480px) {
-  .growth-vcard { flex: 0 0 85vw; align-self: auto; }
+  .growth-vcard { flex: 0 0 88vw; }
   .bci { flex: 0 0 82vw !important; width: 82vw !important; }
 }

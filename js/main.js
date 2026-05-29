@@ -129,6 +129,18 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 /* ============================================================
+   GROWTH CARDS — READ MORE TOGGLE
+   ============================================================ */
+document.querySelectorAll('.growth-vcard-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.growth-vcard');
+    const expanded = card.classList.toggle('expanded');
+    btn.textContent = expanded ? 'Show less' : 'Read more';
+    btn.setAttribute('aria-expanded', expanded);
+  });
+});
+
+/* ============================================================
    BRANDING MODAL
    ============================================================ */
 const brandingData = [
