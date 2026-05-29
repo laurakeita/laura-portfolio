@@ -1281,6 +1281,53 @@ section { scroll-margin-top: var(--nav-h); }
 }
 
 /* ============================================================
+   GROWTH — FULL-SCREEN SPLIT LAYOUT
+   ============================================================ */
+.growth-section-full {
+  padding: 0 !important;
+  min-height: calc(100vh - var(--nav-h));
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.growth-layout {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+
+.growth-panel-left {
+  width: clamp(210px, 22vw, 290px);
+  flex-shrink: 0;
+  padding: 3rem 2rem 3rem clamp(1.5rem, 5vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6rem;
+  border-right: 1px solid var(--border);
+}
+
+.growth-panel-left .section-title {
+  margin-bottom: 0;
+}
+
+.growth-scroll-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  margin-top: 0.4rem;
+}
+
+.growth-panel-right {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  padding: 2.5rem 0 2.5rem 1.75rem;
+}
+
+/* ============================================================
    GROWTH — HORIZONTAL CAROUSEL
    ============================================================ */
 .growth-carousel-outer {
@@ -1298,6 +1345,9 @@ section { scroll-margin-top: var(--nav-h); }
   padding-bottom: 1rem;
   scrollbar-width: thin;
   scrollbar-color: var(--border-med) transparent;
+  align-items: stretch;
+  flex: 1;
+  padding-right: clamp(1.5rem, 5vw, 4rem);
 }
 
 .growth-carousel::-webkit-scrollbar { height: 4px; }
@@ -1314,6 +1364,7 @@ section { scroll-margin-top: var(--nav-h); }
   display: flex;
   flex-direction: column;
   transition: box-shadow var(--transition), transform var(--transition);
+  align-self: stretch;
 }
 
 .growth-vcard:hover {
@@ -1588,11 +1639,28 @@ section { scroll-margin-top: var(--nav-h); }
    ============================================================ */
 @media (max-width: 960px) {
   .growth-vcard { flex: 0 0 280px; }
+  .growth-panel-left { width: clamp(190px, 20vw, 250px); }
   .brand-collage { min-height: 480px; }
   .bci-0 { width: clamp(200px, 30%, 278px); }
 }
 
 @media (max-width: 768px) {
+  /* Growth: stack vertically on mobile */
+  .growth-section-full { min-height: auto; overflow: visible; }
+  .growth-layout { flex-direction: column; }
+  .growth-panel-left {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem clamp(1.25rem, 5vw, 2rem) 1.75rem;
+    justify-content: flex-start;
+  }
+  .growth-panel-right {
+    padding: 2rem 0 2rem clamp(1.25rem, 5vw, 2rem);
+    overflow: hidden;
+  }
+  .growth-carousel { padding-right: clamp(1.25rem, 5vw, 2rem); }
+
   .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
   .modal-img { height: 200px; }
 
@@ -1632,6 +1700,6 @@ section { scroll-margin-top: var(--nav-h); }
 }
 
 @media (max-width: 480px) {
-  .growth-vcard { flex: 0 0 85vw; }
+  .growth-vcard { flex: 0 0 85vw; align-self: auto; }
   .bci { flex: 0 0 82vw !important; width: 82vw !important; }
 }
