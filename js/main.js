@@ -64,8 +64,8 @@ if (!prefersReducedMotion) {
    ============================================================ */
 const roles = [
   'Growth Marketing Professional',
-  'Strategy & Operations Expert',
-  'Business Development Lead',
+  'GTM & Strategy Operations',
+  'Data-Driven Growth Strategist',
   'HEC Paris MBA Graduate',
 ];
 
@@ -147,8 +147,8 @@ const brandingData = [
   {
     tag: 'Brand Identity · Growth',
     title: 'Olivia Yao Jewellery — Brand & Growth Strategy',
-    desc: 'Led end-to-end brand identity and growth strategy for a premium jewellery brand expanding into Hong Kong and Japan. Developed visual merchandising guidelines, KOL partnership frameworks, and a multichannel acquisition funnel that drove +43% GMV YoY. Co-developed new product lines through strategic creator partnerships, expanding the brand into adjacent home décor categories.',
-    tags: ['Brand Identity', 'GTM', 'HK & Japan', 'Visual Direction', 'A/B Testing', '+43% GMV'],
+    desc: 'Led end-to-end brand identity and growth strategy for a premium jewellery brand expanding into Hong Kong and Japan. Developed visual merchandising guidelines, KOL partnership frameworks, and a multichannel acquisition funnel that drove +43% revenue YoY. Co-developed new product lines through strategic creator partnerships, expanding the brand into adjacent home décor categories.',
+    tags: ['Brand Identity', 'GTM', 'HK & Japan', 'Visual Direction', 'A/B Testing', '+43% Revenue'],
     bg: 'linear-gradient(145deg,#e8d5b7 0%,#c49050 38%,#8b6820 68%,#5c420e 100%)'
   },
   {
