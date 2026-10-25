@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MMM Case Study — Laura Wang</title>
+  <title>MMM: A Model to Measure Media Efficiency — Laura Wang</title>
   <meta name="description" content="Case study: a Bayesian marketing mix model (Google Meridian) that predicts revenue well but mis-attributes channel ROI, validated against synthetic ground truth." />
   <link rel="canonical" href="https://laurakeita.github.io/laura-portfolio/mmm.html" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="A model can predict revenue well and still credit the wrong channel" />
+  <meta property="og:title" content="MMM: A Model to Measure Media Efficiency" />
   <meta property="og:description" content="Bayesian MMM case study by Laura Wang: prediction checks passed, attribution checks did not." />
   <meta property="og:url" content="https://laurakeita.github.io/laura-portfolio/mmm.html" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@500;600;700&family=Lora:wght@700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
@@ -45,7 +45,7 @@
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent); }
+    a { color: var(--accent); text-decoration: none; }
     a:focus-visible, button:focus-visible, summary:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
@@ -97,23 +97,55 @@
       padding: 0 4px;
     }
 
-    /* ---------- Nav ---------- */
-    .topbar {
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
+    /* ---------- Nav (matches the main site) ---------- */
+    :root { --nav-h: 64px; }
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); z-index: 100;
+      background: rgba(246,246,243,0.85);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.18s ease, background 0.18s ease;
     }
-    .topbar .container {
-      display: flex; align-items: center; justify-content: space-between;
-      min-height: 64px; gap: 16px;
+    .nav.scrolled { background: rgba(246,246,243,0.95); border-color: var(--border); }
+    .nav-inner {
+      height: 100%; max-width: var(--max); margin: 0 auto;
+      padding: 0 clamp(1.25rem, 4vw, 3rem);
+      display: flex; align-items: center; justify-content: space-between; gap: 2rem;
     }
-    .topbar a {
-      font-family: var(--mono); font-size: 13px; color: var(--ink);
-      text-decoration: none; display: inline-flex; align-items: center; min-height: 44px;
+    .nav-logo {
+      font-family: 'Lora', serif; font-size: 20px; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.01em; flex-shrink: 0; text-decoration: none;
     }
-    .topbar a:hover { color: var(--accent); }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.75rem; align-items: center; }
+    .nav-links a {
+      font-family: 'Inter', var(--sans); font-size: 14px; font-weight: 500;
+      color: var(--muted); text-decoration: none; white-space: nowrap; transition: color 0.18s ease;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      padding: 4px; background: none; border: none; flex-shrink: 0;
+    }
+    .hamburger span { display: block; width: 20px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.28s ease, opacity 0.28s ease; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none; position: fixed; top: var(--nav-h); left: 0; right: 0;
+      background: rgba(246,246,243,0.98); border-bottom: 1px solid var(--border);
+      padding: 1.5rem clamp(1.25rem, 4vw, 3rem); flex-direction: column; gap: 1.25rem; z-index: 99;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Inter', var(--sans); font-size: 15px; font-weight: 500; color: var(--muted); text-decoration: none; }
+    .mobile-menu a:hover { color: var(--ink); }
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+    }
 
     /* ---------- Hero ---------- */
-    .hero { padding-top: 72px; }
+    .hero { padding-top: calc(var(--nav-h) + 48px); }
     .tldr {
       margin-top: 40px;
       display: grid;
@@ -254,12 +286,27 @@
 </head>
 <body>
 
-<header class="topbar">
-  <div class="container">
-    <a href="index.html#business-analysis-portfolio">← Back to portfolio</a>
-    <a href="index.html">Laura Wang</a>
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html#hero" class="nav-logo">Laura <span>Wang</span></a>
+    <ul class="nav-links" style="list-style:none;">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#growth-experience">Growth</a></li>
+      <li><a href="index.html#business-analysis-portfolio">Business &amp; Data</a></li>
+      <li><a href="index.html#experience">Experience</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-</header>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html#about" class="mobile-link">About</a>
+  <a href="index.html#growth-experience" class="mobile-link">Growth</a>
+  <a href="index.html#business-analysis-portfolio" class="mobile-link">Business &amp; Data</a>
+  <a href="index.html#experience" class="mobile-link">Experience</a>
+</div>
 
 <main>
 
@@ -267,8 +314,8 @@
   <section class="hero" aria-labelledby="title">
     <div class="container">
       <p class="eyebrow">Case study &nbsp;· Marketing mix modeling</p>
-      <h1 id="title">A model can predict revenue well and still credit the wrong channel</h1>
-      <p class="lead">I built a Bayesian marketing mix model in Google Meridian on <span class="num">104</span><!-- src: README.md, Project Structure; MMM_meridian.ipynb cell 9 (time: 104) --> weeks of synthetic data with known channel ROI, then checked whether it recovers the true effects, not only whether it fits revenue.</p>
+      <h1 id="title">MMM: A Model to Measure Media Efficiency</h1>
+      <p class="lead">When I worked at a jewellery brand, measuring performance across media channels became a real problem. Between the gaps in attribution models and the difficulty of tracking offline channel effectiveness, MMM looked like the right solution. So I self-built a Bayesian marketing mix model with Google Meridian to judge cross-channel efficiency and allocate budget based on marginal return. Here I showcase the model on <span class="num">104</span><!-- src: README.md, Project Structure; MMM_meridian.ipynb cell 9 (time: 104) --> weeks of synthetic data.</p>
 
       <div class="tldr">
         <div>
@@ -613,6 +660,30 @@
 </footer>
 
 <script>
+  // Nav: scrolled shadow + mobile hamburger
+  (function () {
+    var nav = document.getElementById('nav');
+    var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 20); };
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+
+    var hamburger = document.getElementById('hamburger');
+    var mobileMenu = document.getElementById('mobile-menu');
+    hamburger.addEventListener('click', function () {
+      var isOpen = !mobileMenu.classList.contains('open');
+      mobileMenu.classList.toggle('open', isOpen);
+      hamburger.classList.toggle('open', isOpen);
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+    mobileMenu.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        mobileMenu.classList.remove('open');
+        hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+  })();
+
   // Results view toggle
   (function () {
     var buttons = [document.getElementById('btn-roi'), document.getElementById('btn-budget')];
