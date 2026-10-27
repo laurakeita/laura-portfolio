@@ -315,7 +315,7 @@
     <div class="container">
       <p class="eyebrow">Case study &nbsp;· Marketing mix modeling</p>
       <h1 id="title">MMM: A Model to Measure Media Efficiency</h1>
-      <p class="lead">When I worked at a jewellery brand, measuring performance across media channels became a real problem. Between the gaps in attribution models and the difficulty of tracking offline channel effectiveness, MMM looked like the right solution. So I self-built a Bayesian marketing mix model with Google Meridian to judge cross-channel efficiency and allocate budget based on marginal return. Here I showcase the model on <span class="num">104</span><!-- src: README.md, Project Structure; MMM_meridian.ipynb cell 9 (time: 104) --> weeks of synthetic data.</p>
+      <p class="lead">A Bayesian marketing mix model built in Google Meridian, to judge cross-channel efficiency and guide budget allocation — shown here on <span class="num">104</span><!-- src: README.md, Project Structure; MMM_meridian.ipynb cell 9 (time: 104) --> weeks of synthetic data.</p>
 
       <div class="tldr">
         <div>
@@ -339,6 +339,117 @@
           <p>What I'd automate: the repeatable checks — column detection, VIF and holdout diagnostics, and re-running the optimiser each quarter. What stays with me: scope decisions, setting thresholds, and turning the output into next quarter's experiment plan.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WAS BUILT ================= -->
+  <section aria-labelledby="built">
+    <div class="container">
+      <p class="eyebrow">How it was built</p>
+      <h2 id="built">Six steps from raw data to a validated result</h2>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="n">01</span>
+          <h3>Data audit</h3>
+          <p>Detected media, impression and KPI columns automatically, then checked spend share, correlation and VIF for identifiability risk.</p>
+        </li>
+        <li class="step">
+          <span class="n">02</span>
+          <h3>Scope decisions</h3>
+          <p>Tested whether to split to ad-group level and include offline spend; excluded what failed collinearity or holdout checks and moved it to experiments.</p>
+          <a href="#scope-decisions" id="open-scope">See the decisions ↓</a>
+        </li>
+        <li class="step">
+          <span class="n">03</span>
+          <h3>Bayesian model</h3>
+          <p>Meridian with a log-normal ROI prior (mean 2<!-- src: MMM_meridian.ipynb cell 10, roi_mu = 2 -->, sd 1.5<!-- src: MMM_meridian.ipynb cell 10, roi_sigma = 1.5 -->) and adstock up to 7<!-- src: MMM_meridian.ipynb cell 11, max_lag=7 --> weeks, sampled with 5 chains × 2,000 draws<!-- src: MMM_meridian.ipynb cell 12, n_chains=5, n_keep=2000 -->.</p>
+        </li>
+        <li class="step">
+          <span class="n">04</span>
+          <h3>Diagnostics</h3>
+          <p>Checked trace plots and R-hat, then reviewed contribution, ROI, response curves and adstock decay.</p>
+        </li>
+        <li class="step">
+          <span class="n">05</span>
+          <h3>Optimisation</h3>
+          <p>Reallocated the historical budget at a fixed total with ±30%<!-- src: outputs/optimization_output.html, Optimization scenario --> channel constraints to maximise incremental revenue.</p>
+        </li>
+        <li class="step">
+          <span class="n">06</span>
+          <h3>Validation</h3>
+          <p>Compared estimated ROI with a prior ROI benchmark to measure attribution error, separately from fit.</p>
+        </li>
+      </ol>
+
+      <details class="block" id="scope-decisions">
+        <summary>Inside step 02: the two scope decisions</summary>
+        <div class="inner">
+          <div class="dec-grid">
+
+            <article class="dec">
+              <h3>Should the model go down to ad-group level?</h3>
+              <dl>
+                <div>
+                  <dt>The question</dt>
+                  <dd>Would splitting each platform into ad groups give more useful ROI estimates than one number per channel?</dd>
+                </div>
+                <div>
+                  <dt>Why it is hard</dt>
+                  <dd>More granular inputs multiply the number of media parameters against a fixed number of weekly observations, and ad groups inside one platform usually move together, so their effects become hard to separate.</dd>
+                </div>
+                <div>
+                  <dt>How I tested it</dt>
+                  <dd>
+                    <ul>
+                      <li>Pairwise spend correlation and VIF across candidate ad groups.</li>
+                      <li>Spend variation per ad group (coefficient of variation over time).</li>
+                      <li>Out-of-sample fit on a holdout balanced across time, not one block at the end of the window, comparing in-sample vs. holdout error for the channel-level and ad-group models.</li>
+                      <li>Whether posteriors move away from the priors or simply return them.</li>
+                    </ul>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Decision rule</dt>
+                  <dd>Keep the more granular spec only if collinearity is acceptable and holdout error does not degrade. Thresholds: <span class="ph">[VIF THRESHOLD]</span>, <span class="ph">[MAX ACCEPTABLE HOLDOUT ERROR GAP]</span>. If the rule fails, keep the model at channel level, exclude ad-group splits from the MMM, and measure them with in-platform experiments (A/B or conversion-lift tests).</dd>
+                </div>
+                <div>
+                  <dt>Outcome</dt>
+                  <dd>I tested the ad-group split in an earlier iteration. Ad groups within the same platform moved together too closely, so the multicollinearity was too high for the model to separate their effects. I kept the model at channel level and left ad-group questions to in-platform experiments.</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article class="dec">
+              <h3>Should offline channel budgets be included?</h3>
+              <dl>
+                <div>
+                  <dt>The question</dt>
+                  <dd>Should offline spend enter the model as a media channel alongside digital?</dd>
+                </div>
+                <div>
+                  <dt>Why it is hard</dt>
+                  <dd>Offline spend is often flighted in a few bursts that coincide with seasonal peaks, so its effect can be confounded with seasonality and baseline, and there are few independent data points.</dd>
+                </div>
+                <div>
+                  <dt>How I tested it</dt>
+                  <dd>The same four checks as the ad-group decision, plus whether offline flights overlap with seasonal peaks or with large digital pushes.</dd>
+                </div>
+                <div>
+                  <dt>Decision rule</dt>
+                  <dd>Include offline only if it passes the same thresholds. If it fails, exclude it from the MMM, estimate it with a geo experiment (test vs. control regions), and feed the result back into the MMM as an ROI prior.</dd>
+                </div>
+                <div>
+                  <dt>Outcome</dt>
+                  <dd><span class="ph">[WHAT I DECIDED AND WHY]</span> In the final model, offline discounting enters as a control variable, not as a media channel.<!-- src: MMM_meridian.ipynb cell 8, controls=['Offline Discount'] --></dd>
+                </div>
+              </dl>
+            </article>
+
+          </div>
+          <p class="closing">Excluding a channel from the model is a measurement decision, not a statement that the channel does not work.</p>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -516,117 +627,6 @@
     </div>
   </section>
 
-  <!-- ================= HOW IT WAS BUILT ================= -->
-  <section aria-labelledby="built">
-    <div class="container">
-      <p class="eyebrow">How it was built</p>
-      <h2 id="built">Six steps from raw data to a validated result</h2>
-
-      <ol class="steps">
-        <li class="step">
-          <span class="n">01</span>
-          <h3>Data audit</h3>
-          <p>Detected media, impression and KPI columns automatically, then checked spend share, correlation and VIF for identifiability risk.</p>
-        </li>
-        <li class="step">
-          <span class="n">02</span>
-          <h3>Scope decisions</h3>
-          <p>Tested whether to split to ad-group level and include offline spend; excluded what failed collinearity or holdout checks and moved it to experiments.</p>
-          <a href="#scope-decisions" id="open-scope">See the decisions ↓</a>
-        </li>
-        <li class="step">
-          <span class="n">03</span>
-          <h3>Bayesian model</h3>
-          <p>Meridian with a log-normal ROI prior (mean 2<!-- src: MMM_meridian.ipynb cell 10, roi_mu = 2 -->, sd 1.5<!-- src: MMM_meridian.ipynb cell 10, roi_sigma = 1.5 -->) and adstock up to 7<!-- src: MMM_meridian.ipynb cell 11, max_lag=7 --> weeks, sampled with 5 chains × 2,000 draws<!-- src: MMM_meridian.ipynb cell 12, n_chains=5, n_keep=2000 -->.</p>
-        </li>
-        <li class="step">
-          <span class="n">04</span>
-          <h3>Diagnostics</h3>
-          <p>Checked trace plots and R-hat, then reviewed contribution, ROI, response curves and adstock decay.</p>
-        </li>
-        <li class="step">
-          <span class="n">05</span>
-          <h3>Optimisation</h3>
-          <p>Reallocated the historical budget at a fixed total with ±30%<!-- src: outputs/optimization_output.html, Optimization scenario --> channel constraints to maximise incremental revenue.</p>
-        </li>
-        <li class="step">
-          <span class="n">06</span>
-          <h3>Validation</h3>
-          <p>Compared estimated ROI with a prior ROI benchmark to measure attribution error, separately from fit.</p>
-        </li>
-      </ol>
-
-      <details class="block" id="scope-decisions">
-        <summary>Inside step 02: the two scope decisions</summary>
-        <div class="inner">
-          <div class="dec-grid">
-
-            <article class="dec">
-              <h3>Should the model go down to ad-group level?</h3>
-              <dl>
-                <div>
-                  <dt>The question</dt>
-                  <dd>Would splitting each platform into ad groups give more useful ROI estimates than one number per channel?</dd>
-                </div>
-                <div>
-                  <dt>Why it is hard</dt>
-                  <dd>More granular inputs multiply the number of media parameters against a fixed number of weekly observations, and ad groups inside one platform usually move together, so their effects become hard to separate.</dd>
-                </div>
-                <div>
-                  <dt>How I tested it</dt>
-                  <dd>
-                    <ul>
-                      <li>Pairwise spend correlation and VIF across candidate ad groups.</li>
-                      <li>Spend variation per ad group (coefficient of variation over time).</li>
-                      <li>Out-of-sample fit on a holdout balanced across time, not one block at the end of the window, comparing in-sample vs. holdout error for the channel-level and ad-group models.</li>
-                      <li>Whether posteriors move away from the priors or simply return them.</li>
-                    </ul>
-                  </dd>
-                </div>
-                <div>
-                  <dt>Decision rule</dt>
-                  <dd>Keep the more granular spec only if collinearity is acceptable and holdout error does not degrade. Thresholds: <span class="ph">[VIF THRESHOLD]</span>, <span class="ph">[MAX ACCEPTABLE HOLDOUT ERROR GAP]</span>. If the rule fails, keep the model at channel level, exclude ad-group splits from the MMM, and measure them with in-platform experiments (A/B or conversion-lift tests).</dd>
-                </div>
-                <div>
-                  <dt>Outcome</dt>
-                  <dd>I tested the ad-group split in an earlier iteration. Ad groups within the same platform moved together too closely, so the multicollinearity was too high for the model to separate their effects. I kept the model at channel level and left ad-group questions to in-platform experiments.</dd>
-                </div>
-              </dl>
-            </article>
-
-            <article class="dec">
-              <h3>Should offline channel budgets be included?</h3>
-              <dl>
-                <div>
-                  <dt>The question</dt>
-                  <dd>Should offline spend enter the model as a media channel alongside digital?</dd>
-                </div>
-                <div>
-                  <dt>Why it is hard</dt>
-                  <dd>Offline spend is often flighted in a few bursts that coincide with seasonal peaks, so its effect can be confounded with seasonality and baseline, and there are few independent data points.</dd>
-                </div>
-                <div>
-                  <dt>How I tested it</dt>
-                  <dd>The same four checks as the ad-group decision, plus whether offline flights overlap with seasonal peaks or with large digital pushes.</dd>
-                </div>
-                <div>
-                  <dt>Decision rule</dt>
-                  <dd>Include offline only if it passes the same thresholds. If it fails, exclude it from the MMM, estimate it with a geo experiment (test vs. control regions), and feed the result back into the MMM as an ROI prior.</dd>
-                </div>
-                <div>
-                  <dt>Outcome</dt>
-                  <dd><span class="ph">[WHAT I DECIDED AND WHY]</span> In the final model, offline discounting enters as a control variable, not as a media channel.<!-- src: MMM_meridian.ipynb cell 8, controls=['Offline Discount'] --></dd>
-                </div>
-              </dl>
-            </article>
-
-          </div>
-          <p class="closing">Excluding a channel from the model is a measurement decision, not a statement that the channel does not work.</p>
-        </div>
-      </details>
-    </div>
-  </section>
-
   <!-- ================= LIMITS ================= -->
   <section aria-labelledby="limits">
     <div class="container">
@@ -635,16 +635,16 @@
 
       <div class="limits">
         <details class="block">
-          <summary>Why R² is 0.30<!-- src: MMM_meridian.ipynb cell 12, R_Squared 0.297496 --> while MAPE is 9%<!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993 --></summary>
+          <summary><span>Why I think R² of <span class="num">0.30</span><!-- src: MMM_meridian.ipynb cell 12, R_Squared 0.297496 --> doesn't affect the credibility of this model</span></summary>
           <div class="inner"><p>R² measures how much of the week-to-week <em>variance</em> in revenue the model explains; MAPE measures the average <em>absolute</em> error on each week's prediction — they penalise the model differently. Baseline (non-media) revenue accounts for <span class="num">68.1%</span><!-- src: outputs/summary_output.html, channel contribution data; README.md, Key Results --> of total contribution, and that baseline's own week-to-week movement is harder for a model built on media regressors to fully capture. That caps how much variance the model can claim credit for (R²), even while its absolute prediction error stays low (MAPE). A low R² here is a property of how much of revenue is baseline versus media-driven, not evidence the model fits poorly.</p></div>
         </details>
         <details class="block">
           <summary>Adapting this to a brand-led, distributor-sold business</summary>
-          <div class="inner"><p><span class="ph">[PLACEHOLDER: BRAND-LED / DISTRIBUTOR ADAPTATION]</span></p></div>
+          <div class="inner"><p>Three changes, in priority order, plus one that applies regardless. First: get sell-out (POS) data instead of sell-in. Sell-in reflects the distributor's own ordering and inventory decisions — stocking cycles, trade deals, quarter-end pushes — not real consumer demand, which is why it doesn't work well as an MMM's dependent variable; sell-out, pulled from a retail partner's POS system or bought as syndicated data, is the real sales signal and the industry default. Second: trade promotion needs its own variable, separate from media. Retailer discounts, displays and trade deals often move sell-out more than media does, and a promotion also pulls forward future purchases — a dip right after the promotion that a naive model would misread as decay rather than borrowed demand. Third, only if POS data genuinely isn't available: fall back to a brand metric media can move directly — brand mention volume, or branded search — and model the link from that metric to sell-through as a separate step. Alongside all three: lengthen the adstock window. This project's adstock decays over <span class="num">7</span><!-- src: MMM_meridian.ipynb cell 11, max_lag=7 --> weeks because an e-commerce purchase follows exposure quickly; a distributor-sold brand has a longer, lumpier path from exposure to an actual sale, so the carryover window needs to stretch to match it.</p></div>
         </details>
         <details class="block">
-          <summary>AI layer: from model output to decision</summary>
-          <div class="inner"><p><span class="ph">[PLACEHOLDER: AI LAYER]</span></p></div>
+          <summary>Why TikTok having no prior ROI doesn't affect whether this model works</summary>
+          <div class="inner"><p>TikTok is fit with exactly the same mechanism as Meta and Google — the same shared prior, the same MCMC process — and it converges and produces a usable estimate (<span class="num">2.0</span><!-- src: MMM_meridian.ipynb cell 17, TikTok posterior roi 2.0 --> ROI, a share of total contribution) like any other channel. Meridian doesn't need an external benchmark to fit a channel; only this case study's validation step does. The missing prior ROI is a gap in what I can check for that one channel, not a gap in the model itself. Separately: because all three channels are estimated jointly from correlated spend, TikTok's result still interacts with Meta's and Google's — that's the collinearity finding above, not a consequence of the missing benchmark.</p></div>
         </details>
       </div>
     </div>
