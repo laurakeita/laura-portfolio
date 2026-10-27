@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MMM: A Model to Measure Media Efficiency — Laura Wang</title>
-  <meta name="description" content="Case study: a Bayesian marketing mix model (Google Meridian) that predicts revenue well but mis-attributes channel ROI, validated against synthetic ground truth." />
+  <meta name="description" content="Case study: a Bayesian marketing mix model (Google Meridian) that predicts revenue well but mis-attributes channel ROI, validated against a prior ROI benchmark." />
   <link rel="canonical" href="https://laurakeita.github.io/laura-portfolio/mmm.html" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="MMM: A Model to Measure Media Efficiency" />
@@ -320,23 +320,23 @@
       <div class="tldr">
         <div>
           <span class="label">Problem</span>
-          <p>Teams validate MMMs on fit metrics like MAPE. Fit says nothing about whether ROI is credited to the right channel, and budget moves are made on ROI.</p>
+          <p>At a jewellery brand, measuring performance across media channels was a real problem — attribution models disagreed with each other, and offline channel effectiveness was nearly impossible to track.</p>
         </div>
         <div>
-          <span class="label">Approach</span>
-          <p>Bayesian MMM on Meta, Google and TikTok with log-normal ROI priors, with collinearity checks before deciding model scope, then a comparison against ground-truth ROI.</p>
+          <span class="label">Approach + Result</span>
+          <p>Built a Bayesian MMM in Google Meridian and validated its ROI estimates against a prior ROI benchmark. Prediction was accurate enough to size total media budget with confidence (MAPE <span class="num">9%</span><!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993 -->); attribution was not accurate enough to act on the optimiser's own suggestion to shift budget into Google (<span class="num">24.9%</span><!-- src: MMM_meridian.ipynb cell 18, Average ROI Recovery Error 24.86% --> average ROI recovery error) without testing it first.</p>
         </div>
         <div>
-          <span class="label">Result</span>
-          <p>MAPE <span class="num">9%</span><!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993 -->, but average ROI recovery error <span class="num">24.9%</span><!-- src: MMM_meridian.ipynb cell 18, Average ROI Recovery Error 24.86% -->. Good prediction, unreliable attribution.</p>
-        </div>
-        <div>
-          <span class="label">Stack</span>
-          <p>Python, Google Meridian, TensorFlow Probability, ArviZ, pandas, statsmodels</p>
+          <span class="label">Cadence</span>
+          <p>Refit quarterly as new weeks of data arrive. Each cycle's weakest ROI-recovery channel sets the next quarter's experiment plan — the lift test needed to turn it into a trusted prior.</p>
         </div>
         <div>
           <span class="label">My role</span>
           <p>Solo project: data audit, model spec, diagnostics, budget optimisation and validation design.</p>
+        </div>
+        <div>
+          <span class="label">AI's role</span>
+          <p>What I'd automate: the repeatable checks — column detection, VIF and holdout diagnostics, and re-running the optimiser each quarter. What stays with me: scope decisions, setting thresholds, and turning the output into next quarter's experiment plan.</p>
         </div>
       </div>
     </div>
@@ -345,46 +345,46 @@
   <!-- ================= CORE FINDING ================= -->
   <section aria-labelledby="finding">
     <div class="container">
-      <p class="eyebrow">The core finding</p>
-      <h2 id="finding">Prediction and attribution are different tests</h2>
+      <p class="eyebrow">The signal</p>
+      <h2 id="finding">The model is credible. The gap against the prior ROI is what needs testing — not a verdict.</h2>
 
       <div class="finding-grid">
         <div class="fcard light">
-          <span class="status label"><span class="dot" style="background:#1A6B3C" aria-hidden="true"></span>Passed</span>
-          <h3>Prediction checks passed</h3>
+          <span class="status label"><span class="dot" style="background:#1A6B3C" aria-hidden="true"></span>Credible</span>
+          <h3>Good enough to size the budget</h3>
           <div class="metrics">
-            <div>
-              <span class="label">Max R-hat</span>
-              <div class="metric-val">1.001</div><!-- src: images/rhat_convergence.png (highest box, roi_m ≈ 1.0010); README.md, Key Results -->
-              <p class="metric-note">All parameters converged across <span class="num">5</span><!-- src: MMM_meridian.ipynb cell 12, n_chains=5 --> chains (threshold 1.1).</p>
-            </div>
             <div>
               <span class="label">MAPE</span>
               <div class="metric-val">9%</div><!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993; outputs/summary_output.html, Model fit metrics -->
               <p class="metric-note">wMAPE <span class="num">9%</span><!-- src: MMM_meridian.ipynb cell 12, wMAPE 0.086645 --> on weekly revenue.</p>
             </div>
+            <div>
+              <span class="label">R²</span>
+              <div class="metric-val">0.30</div><!-- src: MMM_meridian.ipynb cell 12, R_Squared 0.297496 -->
+              <p class="metric-note">Converged cleanly across <span class="num">5</span><!-- src: MMM_meridian.ipynb cell 12, n_chains=5 --> chains (max R-hat <span class="num">1.001</span><!-- src: images/rhat_convergence.png (highest box, roi_m ≈ 1.0010); README.md, Key Results -->).</p>
+            </div>
           </div>
         </div>
 
         <div class="fcard dark">
-          <span class="status label"><span class="dot" style="background:#F2A38F" aria-hidden="true"></span>Did not pass</span>
-          <h3>Attribution check did not</h3>
+          <span class="status label"><span class="dot" style="background:#F2A38F" aria-hidden="true"></span>Unverified</span>
+          <h3>Not yet verified against the prior ROI</h3>
           <div class="metrics">
             <div>
               <span class="label">Avg ROI recovery error</span>
               <div class="metric-val">24.9%</div><!-- src: MMM_meridian.ipynb cell 18, Average ROI Recovery Error 24.86% -->
-              <p class="metric-note">Across the <span class="num">2</span> channels with ground truth.</p>
+              <p class="metric-note">Across the <span class="num">2</span> channels with a prior ROI.</p>
             </div>
             <div>
               <span class="label">Worst channel</span>
               <div class="metric-val">36.7%</div><!-- src: MMM_meridian.ipynb cell 18, Google recovery_error_pct 36.67 -->
-              <p class="metric-note">Google: true ROI <span class="num">3.00</span><!-- src: MMM_meridian.ipynb cell 18, true_roi --> vs. estimate <span class="num">1.9</span><!-- src: MMM_meridian.ipynb cell 18, estimated_roi -->.</p>
+              <p class="metric-note">Google: prior ROI <span class="num">3.00</span><!-- src: MMM_meridian.ipynb cell 18, true_roi --> vs. estimate <span class="num">1.9</span><!-- src: MMM_meridian.ipynb cell 18, estimated_roi -->.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <p class="prose finding-text">The reason is channel identifiability. When channels are scaled up and down together, the model can tell how much revenue media drives in total, but not which channel drove it. The data audit flagged high VIF across the media inputs before fitting. The model then spread credit across channels: all three posterior ROIs landed close to each other and close to the prior mean of <span class="num">2</span><!-- src: MMM_meridian.ipynb cell 10, roi_mu = 2 -->, while Google's true ROI was <span class="num">3.00</span><!-- src: MMM_meridian.ipynb cell 18, true_roi -->.</p>
+      <p class="prose finding-text">The reason is channel identifiability, not a broken model. When channels are scaled up and down together, the model can tell how much revenue media drives in total, but not which channel drove it — that's a mathematical limit on what the data can separate, independent of whether the model is well built. The data audit flagged high VIF across the media inputs before fitting. The model then spread credit across channels: all three posterior ROIs landed close to each other and close to the model's own fitting prior (mean <span class="num">2</span><!-- src: MMM_meridian.ipynb cell 10, roi_mu = 2 -->), while Google's prior ROI benchmark was <span class="num">3.00</span><!-- src: MMM_meridian.ipynb cell 18, true_roi -->. In practice: I'd trust this model to size next quarter's total media budget — the channel-level split is the one piece worth testing before acting on it.</p>
       <p class="footnote">Note: recovery error is computed in the notebook from the rounded ROI shown in Meridian's summary table (Meta 1.8, Google 1.9). The unrounded posterior means are 1.83 and 1.94<!-- src: outputs/summary_output.html, ROI chart data (1.8252, 1.9396); images/roi_by_channel.png -->, so the exact errors are slightly lower. The conclusion does not change.</p>
     </div>
   </section>
@@ -392,18 +392,18 @@
   <!-- ================= EXPLORE ================= -->
   <section aria-labelledby="explore">
     <div class="container">
-      <p class="eyebrow">Explore the results</p>
-      <h2 id="explore">Where the model was right, and where it was not</h2>
+      <p class="eyebrow">The breakdown</p>
+      <h2 id="explore">Google is the one channel worth testing before the next budget call</h2>
 
       <div class="toggle" role="group" aria-label="Choose a results view">
-        <button type="button" id="btn-roi" aria-pressed="true" aria-controls="view-roi">ROI: estimate vs. truth</button>
+        <button type="button" id="btn-roi" aria-pressed="true" aria-controls="view-roi">ROI: estimate vs. prior</button>
         <button type="button" id="btn-budget" aria-pressed="false" aria-controls="view-budget">Budget reallocation</button>
       </div>
 
       <!-- View A -->
       <div class="panel" id="view-roi" role="region" aria-labelledby="btn-roi">
         <div class="legend">
-          <span><i class="swatch truth" aria-hidden="true"></i>Ground truth ROI</span>
+          <span><i class="swatch truth" aria-hidden="true"></i>Prior ROI</span>
           <span><i class="swatch est" aria-hidden="true"></i>Meridian estimate (posterior mean)</span>
         </div>
 
@@ -411,7 +411,7 @@
         <div class="roi-row">
           <span class="roi-name">Meta</span>
           <div class="bars">
-            <div class="bar-line"><span class="bar truth" style="width:calc((100% - 120px) * 2.07 / 3.5)"></span><span class="bar-val">truth 2.07</span><!-- src: MMM_meridian.ipynb cell 18, true_roi --></div>
+            <div class="bar-line"><span class="bar truth" style="width:calc((100% - 120px) * 2.07 / 3.5)"></span><span class="bar-val">prior 2.07</span><!-- src: MMM_meridian.ipynb cell 18, true_roi --></div>
             <div class="bar-line"><span class="bar est" style="width:calc((100% - 120px) * 1.8 / 3.5)"></span><span class="bar-val">est. 1.8</span><!-- src: MMM_meridian.ipynb cell 18, estimated_roi --></div>
           </div>
           <div class="err"><span class="label">Error</span><span class="num">13.0%</span><!-- src: MMM_meridian.ipynb cell 18, recovery_error_pct 13.04 --></div>
@@ -420,7 +420,7 @@
         <div class="roi-row">
           <span class="roi-name">Google</span>
           <div class="bars">
-            <div class="bar-line"><span class="bar truth" style="width:calc((100% - 120px) * 3.00 / 3.5)"></span><span class="bar-val">truth 3.00</span><!-- src: MMM_meridian.ipynb cell 18, true_roi --></div>
+            <div class="bar-line"><span class="bar truth" style="width:calc((100% - 120px) * 3.00 / 3.5)"></span><span class="bar-val">prior 3.00</span><!-- src: MMM_meridian.ipynb cell 18, true_roi --></div>
             <div class="bar-line"><span class="bar est" style="width:calc((100% - 120px) * 1.9 / 3.5)"></span><span class="bar-val">est. 1.9</span><!-- src: MMM_meridian.ipynb cell 18, estimated_roi --></div>
           </div>
           <div class="err"><span class="label">Error</span><span class="num">36.7%</span><!-- src: MMM_meridian.ipynb cell 18, recovery_error_pct 36.67 --></div>
@@ -429,13 +429,13 @@
         <div class="roi-row">
           <span class="roi-name">TikTok</span>
           <div class="bars">
-            <div class="bar-line"><span class="bar-val">no ground truth</span></div>
+            <div class="bar-line"><span class="bar-val">no prior ROI</span></div>
             <div class="bar-line"><span class="bar est" style="width:calc((100% - 120px) * 2.0 / 3.5)"></span><span class="bar-val">est. 2.0</span><!-- src: MMM_meridian.ipynb cell 17, TikTok posterior roi 2.0 (0.6, 4.2) --></div>
           </div>
           <div class="err"><span class="na">Descriptive only</span></div>
         </div>
 
-        <p class="footnote">TikTok has no ground-truth ROI in the synthetic dataset, so its estimate is reported descriptively and is not part of the error average. Its 90% credible interval is wide: <span class="num">0.6–4.2</span><!-- src: MMM_meridian.ipynb cell 17, TikTok posterior roi (0.6, 4.2) -->.</p>
+        <p class="footnote">TikTok has no prior ROI in the synthetic dataset, so its estimate is reported descriptively and is not part of the error average. Its 90% credible interval is wide: <span class="num">0.6–4.2</span><!-- src: MMM_meridian.ipynb cell 17, TikTok posterior roi (0.6, 4.2) -->.</p>
       </div>
 
       <!-- View B -->
@@ -493,22 +493,22 @@
   <!-- ================= RECOMMEND ================= -->
   <section aria-labelledby="recommend">
     <div class="container">
-      <p class="eyebrow">What I would recommend</p>
-      <h2 id="recommend">Test before you move the budget</h2>
+      <p class="eyebrow">The decision</p>
+      <h2 id="recommend">Hold the channel split, size the total budget, and test Google before moving it</h2>
 
       <div class="rec-grid">
         <div class="card">
-          <span class="label">The optimiser says</span>
+          <span class="label">What the model suggests</span>
           <h3>Shift about $65k from Meta into Google</h3>
           <p>The optimiser moves +$65k<!-- src: outputs/optimization_output.html, spend-change chart data --> into Google, funded mostly by Meta, for an expected gain of about +$6k<!-- src: outputs/optimization_output.html, Optimized incremental revenue --> on $3M<!-- src: outputs/optimization_output.html, Non-optimized incremental revenue $3M --> of incremental revenue.</p>
         </div>
         <div class="card">
-          <span class="label">Why not act on it directly</span>
-          <h3>It leans on the least reliable estimate</h3>
-          <p>Google is the channel with the largest recovery error (36.7%<!-- src: MMM_meridian.ipynb cell 18 -->), and its ROI credible interval runs from 0.9 to 3.3<!-- src: MMM_meridian.ipynb cell 17, Google posterior roi 1.9 (0.9, 3.3) -->. The expected gain is small compared with that uncertainty.</p>
+          <span class="label">Why I'm holding off</span>
+          <h3>It leans on the one estimate I haven't verified</h3>
+          <p>Google has the largest gap against its prior ROI (36.7%<!-- src: MMM_meridian.ipynb cell 18 -->), and its credible interval runs from 0.9 to 3.3<!-- src: MMM_meridian.ipynb cell 17, Google posterior roi 1.9 (0.9, 3.3) -->. The expected gain is small next to that uncertainty — not proof the model is wrong, just reason enough to check before moving money.</p>
         </div>
         <div class="card accent">
-          <span class="label">The alternative</span>
+          <span class="label">What I'm doing instead</span>
           <h3>Run a lift test, then feed it back</h3>
           <p>Run a lift experiment on Google first. Use the measured incremental ROI as an informative ROI prior for that channel in Meridian, refit, and only then re-run the optimiser.</p>
         </div>
@@ -552,7 +552,7 @@
         <li class="step">
           <span class="n">06</span>
           <h3>Validation</h3>
-          <p>Compared estimated ROI with the known ground-truth ROI to measure attribution error, separately from fit.</p>
+          <p>Compared estimated ROI with a prior ROI benchmark to measure attribution error, separately from fit.</p>
         </li>
       </ol>
 
@@ -636,7 +636,7 @@
       <div class="limits">
         <details class="block">
           <summary>Why R² is 0.30<!-- src: MMM_meridian.ipynb cell 12, R_Squared 0.297496 --> while MAPE is 9%<!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993 --></summary>
-          <div class="inner"><p><span class="ph">[EXPLAIN R² vs MAPE]</span></p></div>
+          <div class="inner"><p>R² measures how much of the week-to-week <em>variance</em> in revenue the model explains; MAPE measures the average <em>absolute</em> error on each week's prediction — they penalise the model differently. Baseline (non-media) revenue accounts for <span class="num">68.1%</span><!-- src: outputs/summary_output.html, channel contribution data; README.md, Key Results --> of total contribution, and that baseline's own week-to-week movement is harder for a model built on media regressors to fully capture. That caps how much variance the model can claim credit for (R²), even while its absolute prediction error stays low (MAPE). A low R² here is a property of how much of revenue is baseline versus media-driven, not evidence the model fits poorly.</p></div>
         </details>
         <details class="block">
           <summary>Adapting this to a brand-led, distributor-sold business</summary>
