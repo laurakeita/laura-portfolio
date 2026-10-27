@@ -155,9 +155,13 @@
       background: var(--surface);
       overflow: hidden;
     }
-    .tldr > div { padding: 20px; border-right: 1px solid var(--border); }
+    .tldr > div { padding: 24px 20px; border-right: 1px solid var(--border); }
     .tldr > div:last-child { border-right: 0; }
     .tldr p { font-size: 0.9375rem; margin-top: 8px; color: var(--ink); }
+    .tldr-icon { display: block; width: 22px; height: 22px; color: var(--accent); margin-bottom: 16px; }
+    .tldr-icon svg { display: block; width: 100%; height: 100%; }
+    .tldr p.tldr-head { font-size: 1.0625rem; font-weight: 600; color: var(--ink); line-height: 1.3; margin: 12px 0 8px; }
+    .tldr p.tldr-support { font-size: 0.8125rem; color: var(--muted); line-height: 1.5; margin-top: 0; }
     @media (max-width: 960px) {
       .tldr { grid-template-columns: 1fr 1fr; }
       .tldr > div { border-bottom: 1px solid var(--border); }
@@ -319,24 +323,34 @@
 
       <div class="tldr">
         <div>
+          <span class="tldr-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           <span class="label">Problem</span>
-          <p>At a jewellery brand, measuring performance across media channels was a real problem — attribution models disagreed with each other, and offline channel effectiveness was nearly impossible to track.</p>
+          <p class="tldr-head">Channels don't add up</p>
+          <p class="tldr-support">At a jewellery brand: attribution models disagreed with each other, and offline effectiveness was untrackable.</p>
         </div>
         <div>
+          <span class="tldr-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="14"/><line x1="12" y1="20" x2="12" y2="7"/><line x1="19" y1="20" x2="19" y2="4"/></svg></span>
           <span class="label">Approach + Result</span>
-          <p>Built a Bayesian MMM in Google Meridian and validated its ROI estimates against a prior ROI benchmark. Prediction was accurate enough to size total media budget with confidence (MAPE <span class="num">9%</span><!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993 -->); attribution was not accurate enough to act on the optimiser's own suggestion to shift budget into Google (<span class="num">24.9%</span><!-- src: MMM_meridian.ipynb cell 18, Average ROI Recovery Error 24.86% --> average ROI recovery error) without testing it first.</p>
+          <p class="tldr-head">MAPE <span class="num">9%</span><!-- src: MMM_meridian.ipynb cell 12, MAPE 0.087993 -->, gap <span class="num">24.9%</span><!-- src: MMM_meridian.ipynb cell 18, Average ROI Recovery Error 24.86% --></p>
+          <p class="tldr-support">Bayesian MMM in Google Meridian — accurate enough to size the budget, not yet to move it between channels.</p>
         </div>
         <div>
+          <span class="tldr-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg></span>
           <span class="label">Cadence</span>
-          <p>Refit quarterly as new weeks of data arrive. Each cycle's weakest ROI-recovery channel sets the next quarter's experiment plan — the lift test needed to turn it into a trusted prior.</p>
+          <p class="tldr-head">Quarterly refit</p>
+          <p class="tldr-support">The weakest channel each cycle sets the next quarter's test.</p>
         </div>
         <div>
+          <span class="tldr-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
           <span class="label">My role</span>
-          <p>Solo project: data audit, model spec, diagnostics, budget optimisation and validation design.</p>
+          <p class="tldr-head">Solo, end-to-end</p>
+          <p class="tldr-support">Data audit, model spec, diagnostics, optimisation, validation.</p>
         </div>
         <div>
+          <span class="tldr-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
           <span class="label">AI's role</span>
-          <p>What I'd automate: the repeatable checks — column detection, VIF and holdout diagnostics, and re-running the optimiser each quarter. What stays with me: scope decisions, setting thresholds, and turning the output into next quarter's experiment plan.</p>
+          <p class="tldr-head">Automates the checks</p>
+          <p class="tldr-support">Scope calls and next steps stay with me.</p>
         </div>
       </div>
     </div>
