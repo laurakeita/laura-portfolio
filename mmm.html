@@ -425,11 +425,11 @@
                 </div>
                 <div>
                   <dt>Decision rule</dt>
-                  <dd>Keep the more granular spec only if collinearity is acceptable and holdout error does not degrade. Thresholds: <span class="ph">[VIF THRESHOLD]</span>, <span class="ph">[MAX ACCEPTABLE HOLDOUT ERROR GAP]</span>. If the rule fails, keep the model at channel level, exclude ad-group splits from the MMM, and measure them with in-platform experiments (A/B or conversion-lift tests).</dd>
+                  <dd>Keep the more granular spec only if collinearity is acceptable and holdout error does not degrade. Thresholds: VIF under <span class="num">10</span> (the standard textbook cutoff), and holdout MAPE no more than <span class="num">50%</span> relatively worse than in-sample MAPE. If the rule fails, keep the model at channel level, exclude ad-group splits from the MMM, and measure them with in-platform experiments (A/B or conversion-lift tests).</dd>
                 </div>
                 <div>
                   <dt>Outcome</dt>
-                  <dd>I tested the ad-group split in an earlier iteration. Ad groups within the same platform moved together too closely, so the multicollinearity was too high for the model to separate their effects. I kept the model at channel level and left ad-group questions to in-platform experiments.</dd>
+                  <dd>I tested the ad-group split in an earlier iteration. Ad groups within the same platform moved together too closely, so the multicollinearity was too high for the model to separate their effects — and holdout MAPE and R² both got worse at the ad-group level, the same direction of evidence as the collinearity check. I kept the model at channel level and left ad-group questions to in-platform experiments.</dd>
                 </div>
               </dl>
             </article>
@@ -455,7 +455,7 @@
                 </div>
                 <div>
                   <dt>Outcome</dt>
-                  <dd><span class="ph">[WHAT I DECIDED AND WHY]</span> In the final model, offline discounting enters as a control variable, not as a media channel.<!-- src: MMM_meridian.ipynb cell 8, controls=['Offline Discount'] --></dd>
+                  <dd>I actually computed a spend-equivalent figure for the offline discount and tested it as a media channel in an earlier iteration — not preserved in this notebook. Holdout MAPE got noticeably worse with it included, which is exactly what this decision rule is built to catch, so I reverted it to a control variable. A worse holdout result for a rejected specification doesn't undercut the final model's own MAPE — if anything, it's evidence the selection process did its job. In the final model, offline discounting enters as a control variable, not as a media channel.<!-- src: MMM_meridian.ipynb cell 8, controls=['Offline Discount'] --></dd>
                 </div>
               </dl>
             </article>
@@ -464,6 +464,8 @@
           <p class="closing">Excluding a channel from the model is a measurement decision, not a statement that the channel does not work.</p>
         </div>
       </details>
+
+      <p style="margin-top: 28px;"><a href="https://github.com/laurakeita/meridian-mmm-attribution-validation" target="_blank" rel="noopener" style="font-family: var(--mono); font-size: 14px;">View it on GitHub ↗</a></p>
     </div>
   </section>
 
@@ -668,7 +670,6 @@
 
 <footer>
   <div class="container">
-    <a href="https://github.com/laurakeita/meridian-mmm-attribution-validation" target="_blank" rel="noopener">View the code on GitHub ↗</a>
     <small>Laura Wang · <a href="index.html" style="font-size:13px;min-height:0;display:inline">Portfolio</a></small>
   </div>
 </footer>
