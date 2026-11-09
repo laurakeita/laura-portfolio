@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building an AI-Assisted SEO Workflow — Laura Wang</title>
+  <meta name="description" content="Case study: evaluating two ways to measure AI search visibility, then directing Claude Code to build a prompt-based competitor monitor across Google, ChatGPT, Claude, Gemini and Perplexity." />
+  <link rel="canonical" href="https://laurakeita.github.io/laura-portfolio/seo-geo-pulse.html" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Building an AI-Assisted SEO Workflow" />
+  <meta property="og:description" content="Case study by Laura Wang: choosing prompt-based AI visibility monitoring over provider mention data, and directing Claude Code to build it." />
+  <meta property="og:url" content="https://laurakeita.github.io/laura-portfolio/seo-geo-pulse.html" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@500;600;700&family=Lora:wght@700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #F6F6F3;
+      --surface: #FFFFFF;
+      --ink: #16181D;
+      --text-2: #3F434C;
+      --muted: #5A5E66;
+      --border: #DCDCD6;
+      --accent: #1E46B8;
+      --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      --radius: 12px;
+      --radius-sm: 10px;
+      --section: 88px;
+      --max: 1120px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:focus-visible, button:focus-visible, summary:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+    @media (min-width: 768px) { .container { padding: 0 40px; } }
+
+    section { padding: var(--section) 0 0; }
+    section:last-of-type { padding-bottom: var(--section); }
+    @media (max-width: 640px) { :root { --section: 56px; } }
+
+    .eyebrow, .label {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    h1 {
+      font-size: clamp(2rem, 4.6vw, 3.1rem);
+      line-height: 1.14;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+      max-width: 22ch;
+      margin: 16px 0 18px;
+    }
+    h2 {
+      font-size: clamp(1.4rem, 2.4vw, 1.875rem);
+      line-height: 1.22;
+      letter-spacing: -0.01em;
+      font-weight: 600;
+      margin: 10px 0 14px;
+    }
+    h3 { font-size: 1rem; font-weight: 600; line-height: 1.35; }
+    p { color: var(--text-2); }
+    .lead { font-size: 1.125rem; max-width: 62ch; }
+    .prose { max-width: 70ch; }
+    .footnote { font-size: 0.8125rem; color: var(--muted); margin-top: 12px; max-width: 80ch; }
+
+    /* ---------- Nav (matches the main site) ---------- */
+    :root { --nav-h: 64px; }
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); z-index: 100;
+      background: rgba(246,246,243,0.85);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+    .nav.scrolled { background: rgba(246,246,243,0.95); border-color: var(--border); }
+    .nav-inner {
+      height: 100%; max-width: var(--max); margin: 0 auto;
+      padding: 0 clamp(1.25rem, 4vw, 3rem);
+      display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+    }
+    .nav-logo {
+      font-family: 'Lora', serif; font-size: 20px; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.01em; flex-shrink: 0; text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.75rem; align-items: center; }
+    .nav-links a {
+      font-family: 'Inter', var(--sans); font-size: 14px; font-weight: 500;
+      color: var(--muted); text-decoration: none; white-space: nowrap; transition: color 0.18s ease;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      padding: 4px; background: none; border: none; flex-shrink: 0;
+    }
+    .hamburger span { display: block; width: 20px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.28s ease, opacity 0.28s ease; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none; position: fixed; top: var(--nav-h); left: 0; right: 0;
+      background: rgba(246,246,243,0.98); border-bottom: 1px solid var(--border);
+      padding: 1.5rem clamp(1.25rem, 4vw, 3rem); flex-direction: column; gap: 1.25rem; z-index: 99;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: 'Inter', var(--sans); font-size: 15px; font-weight: 500; color: var(--muted); text-decoration: none; }
+    .mobile-menu a:hover { color: var(--ink); }
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+    }
+
+    /* ---------- Hero ---------- */
+    .hero { padding-top: calc(var(--nav-h) + 28px); padding-bottom: 8px; }
+    .hero h1 { max-width: 15ch; }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr; row-gap: 28px;
+      grid-template-areas: "top" "shot" "bottom";
+    }
+    .hero-shot-wrap { grid-area: shot; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: 0 1px 2px rgba(22,24,29,0.04); }
+    .hero-shot-wrap img { display: block; width: 100%; height: auto; }
+    .hero-shot-label { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); padding: 10px 14px; border-top: 1px solid var(--border); }
+    .hero-top { grid-area: top; }
+    .hero-bottom { grid-area: bottom; }
+    .role-statement { font-size: 0.9375rem; color: var(--text-2); margin-top: 18px; max-width: 54ch; }
+    .status-note { font-family: var(--mono); font-size: 0.8125rem; color: var(--muted); margin-top: 12px; }
+    .hero-cta-row { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .hero-cta {
+      font-family: var(--sans); font-weight: 600; font-size: 0.9375rem; color: #fff; background: var(--accent);
+      padding: 11px 20px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 7px;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .hero-cta:hover { opacity: 0.88; transform: translateY(-1px); text-decoration: none; }
+    .hero-cta-tag {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--muted); border: 1px solid var(--border);
+      border-radius: 999px; padding: 4px 10px;
+    }
+    .hero-links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 20px; }
+    .hero-link { font-family: var(--sans); font-weight: 600; font-size: 0.9375rem; color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
+    .hero-link:hover { text-decoration: underline; }
+    .hero-link.secondary { color: var(--text-2); font-weight: 500; }
+    @media (min-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr 1.15fr; column-gap: 56px; row-gap: 20px;
+        grid-template-areas: "top shot" "bottom shot"; align-items: start;
+      }
+      .hero-shot-wrap { align-self: center; }
+    }
+
+
+    /* ---------- Flow diagram (AI-supported workflow) ---------- */
+    .flow { display: flex; align-items: stretch; gap: 0; margin-top: 24px; flex-wrap: wrap; }
+    .flow-step {
+      flex: 1 1 210px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px; display: flex; flex-direction: column;
+    }
+    .flow-step .n { font-family: var(--mono); font-size: 12px; color: var(--accent); display: block; margin-bottom: 6px; }
+    .flow-step h3 { font-size: 0.9375rem; }
+    .flow-step p { font-size: 0.8125rem; margin-top: 4px; }
+    .flow-step .role-tag { margin-top: 12px; }
+    .flow-step .role-tag:first-of-type { margin-top: 10px; }
+    .flow-step.is-built { border-color: var(--accent); border-width: 1.5px; box-shadow: inset 3px 0 0 var(--accent); background: #FAFBFF; }
+    .flow-arrow { flex: 0 0 28px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 16px; }
+    @media (max-width: 860px) {
+      .flow { flex-direction: column; align-items: stretch; }
+      .flow-arrow { width: 100%; height: 20px; transform: rotate(90deg); }
+      .flow-step { flex: 1 1 auto; }
+    }
+
+    /* ---------- Tables (human/AI split + validation status) ---------- */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+    th, td { padding: 11px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; font-size: 0.9rem; }
+    thead th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    tbody th { font-weight: 600; white-space: nowrap; }
+    /* A long row label in nowrap can blow out the first column on a narrow
+       screen, pushing every other column off-screen with no visible hint —
+       let labels wrap below the table's min-width breakpoint instead. */
+    @media (max-width: 640px) {
+      tbody th { white-space: normal; max-width: 160px; }
+    }
+    td { color: var(--text-2); }
+    .status-live { color: #1A6B3C; font-weight: 500; }
+    .status-sim { color: #9A6A1E; font-weight: 500; }
+    .status-demo { color: var(--muted); font-weight: 500; }
+    .status-hidden { color: var(--muted); font-weight: 500; }
+    .confidentiality-note { margin-top: 16px; font-size: 0.875rem; color: var(--text-2); padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+
+
+    /* ---------- Human/AI collaboration diagram ---------- */
+    .collab { margin-top: 28px; }
+    .collab-phase { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 20px 24px; }
+    .collab-phase-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+    .collab-phase-head .n { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+    .collab-phase-head h3 { font-size: 1.0625rem; }
+    .collab-row { display: grid; grid-template-columns: 132px 1fr; gap: 14px; padding: 11px 0; border-top: 1px solid var(--border); align-items: baseline; }
+    .collab-row:first-of-type { border-top: 0; }
+    .collab-row p { font-size: 0.9rem; }
+    .role-tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.03em; padding: 3px 9px; border-radius: 6px; display: inline-block; white-space: nowrap; }
+    .role-tag.mine { background: #E8EFFC; color: var(--accent); }
+    .role-tag.ai { background: #EFE8FA; color: #6B4FA0; }
+    .role-tag.output { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+    .collab-arrow-down { display: flex; justify-content: center; padding: 6px 0; color: var(--muted); font-size: 16px; }
+    @media (max-width: 640px) {
+      .collab-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+
+    .decision-callout { margin-top: 16px; background: #FAFBFF; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 14px 18px; }
+    .decision-callout .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; color: var(--accent); text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .decision-callout p { font-size: 0.875rem; }
+
+
+    /* ---------- Annotated screenshot details ---------- */
+    .shot-detail { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+    .shot-detail img { display: block; width: 100%; height: auto; }
+    .shot-detail-caption { font-size: 0.8125rem; color: var(--text-2); padding: 12px 16px; border-top: 1px solid var(--border); }
+    .shot-detail-caption b { color: var(--accent); font-family: var(--mono); }
+    .shot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    @media (max-width: 760px) { .shot-grid { grid-template-columns: 1fr; } }
+
+    /* ---------- Footer ---------- */
+    footer { border-top: 1px solid var(--border); padding: 32px 0 48px; }
+    footer .container { display: flex; justify-content: flex-end; align-items: center; gap: 16px; flex-wrap: wrap; }
+    footer a { font-family: var(--mono); font-size: 14px; display: inline-flex; align-items: center; min-height: 44px; }
+    footer small { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html#hero" class="nav-logo">Laura <span>Wang</span></a>
+    <ul class="nav-links" style="list-style:none;">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#growth-experience">Growth</a></li>
+      <li><a href="index.html#business-analysis-portfolio">Business &amp; Data</a></li>
+      <li><a href="index.html#experience">Experience</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html#about" class="mobile-link">About</a>
+  <a href="index.html#growth-experience" class="mobile-link">Growth</a>
+  <a href="index.html#business-analysis-portfolio" class="mobile-link">Business &amp; Data</a>
+  <a href="index.html#experience" class="mobile-link">Experience</a>
+</div>
+
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" aria-labelledby="title">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-top">
+          <p class="eyebrow">AI Workflow Design &nbsp;· Self-Initiated Project</p>
+          <h1 id="title">From reporting need to working prototype—with AI</h1>
+          <p class="lead">I designed an SEO/GEO reporting workflow and used Claude Code to build it: a dashboard that asks the same question across Google, ChatGPT, Claude, Gemini and Perplexity, and shows which brands come up.</p>
+        </div>
+
+        <div class="hero-shot-wrap">
+          <img src="assets/seo-geo-pulse/prompt-monitor-preview.png" alt="Prompt Monitoring panel: a shopping question with saved tests, focal brand, competitors, market and language fields, four AI platform toggles, and the start of a per-platform results comparison." loading="eager" />
+          <p class="hero-shot-label">Prompt Monitoring &nbsp;· Interactive demo — sample responses, not real AI output</p>
+        </div>
+
+        <div class="hero-bottom">
+          <p class="role-statement">I framed the business question, evaluated vendor tradeoffs, and set scope. Claude Code handled implementation and live debugging.</p>
+          <p class="status-note">Built and wired to live APIs &nbsp;· Verification status below</p>
+          <div class="hero-cta-row">
+            <a href="https://laurakeita.github.io/seo-geo-pulse/" target="_blank" rel="noopener" class="hero-cta">Try the monitoring dashboard →</a>
+            <span class="hero-cta-tag">Interactive demo — sample responses, no live API calls</span>
+          </div>
+          <div class="hero-links">
+            <a href="#approach-decision" class="hero-link">Why I chose this approach →</a>
+            <a href="#built" class="hero-link secondary">See how I worked with AI →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULT ================= -->
+  <section aria-labelledby="result">
+    <div class="container">
+      <p class="eyebrow">Why I built this</p>
+      <h2 id="result">Why I built a custom monitoring tool</h2>
+      <p class="prose">Reviewing AI search visibility for existing FMCG and fashion clients meant repeatedly checking where brands appeared, which competitors showed up, and what sources AI answers cited. I built a custom dashboard around the checks I actually use. That let me choose what to run and how often, keep API costs tied to usage, and avoid relying on add-ons bundled by larger SEO platforms.</p>
+
+      <div class="shot-grid">
+        <div class="shot-detail">
+          <img src="assets/seo-geo-pulse/detail-input-scope.png" alt="Close-up of the Brand name, Website domain, and Tracked keywords input fields." loading="lazy" />
+          <p class="shot-detail-caption"><b>Input scope</b> — <b>1</b> brand name, <b>2</b> website domain, <b>3</b> tracked keywords. These three values drive every tab below.</p>
+        </div>
+        <div class="shot-detail">
+          <img src="assets/seo-geo-pulse/detail-data-boundaries.png" alt="Close-up of the live-data toggle checkbox and the Demo data status badge." loading="lazy" />
+          <p class="shot-detail-caption"><b>Data boundaries</b> — <b>1</b> the live-data toggle, off by default, <b>2</b> the status badge that names the current source. No live fetch was triggered for this screenshot, so it reads "Demo data."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WAS BUILT (collaboration diagram) ================= -->
+  <section aria-labelledby="built">
+    <div class="container">
+      <p class="eyebrow">How it was built</p>
+      <h2 id="built">From requirement to shipped scope</h2>
+
+      <div class="collab">
+        <div class="collab-phase">
+          <div class="collab-phase-head"><span class="n">01</span><h3>Define</h3></div>
+          <div class="collab-row"><span class="role-tag mine">My decisions</span><p>Define reporting needs, evaluate vendor tradeoffs, and set the initial scope.</p></div>
+          <div class="collab-row"><span class="role-tag ai">Claude Code</span><p>Gather API documentation and pricing information.</p></div>
+          <div class="collab-row"><span class="role-tag output">Output</span><p>Defined requirements and a selected API provider — DataForSEO, the only one testable without a client budget behind it.</p></div>
+          <div class="decision-callout" id="approach-decision">
+            <span class="tag">Decision within Define — how to measure AI visibility</span>
+            <p><strong>LLM Mentions</strong> offered broad visibility across DataForSEO's own dataset — useful for smaller brands, though its value depends on market and language coverage (its ChatGPT dataset is U.S./English only). I chose <strong>LLM Responses</strong> instead, so I could run the same shopping questions across ChatGPT, Claude, Gemini and Perplexity — including Taiwan-specific scenarios in Traditional Chinese — and inspect the actual answers behind each brand mention.</p>
+          </div>
+        </div>
+        <div class="collab-arrow-down" aria-hidden="true">↓</div>
+
+        <div class="collab-phase">
+          <div class="collab-phase-head"><span class="n">02</span><h3>Build &amp; test</h3></div>
+          <div class="collab-row"><span class="role-tag mine">My decisions</span><p>Set functionality, data-labeling rules, and acceptance criteria.</p></div>
+          <div class="collab-row"><span class="role-tag ai">Claude Code</span><p>Implement the dashboard and API integration, test real responses, and resolve integration issues.</p></div>
+          <div class="collab-row"><span class="role-tag output">Output</span><p>Working integrations within the tested scope — 4 issues found and fixed via live calls, not code review alone.</p></div>
+        </div>
+        <div class="collab-arrow-down" aria-hidden="true">↓</div>
+
+        <div class="collab-phase">
+          <div class="collab-phase-head"><span class="n">03</span><h3>Review &amp; ship</h3></div>
+          <div class="collab-row"><span class="role-tag mine">My decisions</span><p>Review the verified scope and decide what remains live, simulated, or withheld.</p></div>
+          <div class="collab-row"><span class="role-tag ai">Claude Code</span><p>Reflect those scope decisions in the implementation.</p></div>
+          <div class="collab-row"><span class="role-tag output">Output</span><p>A two-tab prototype with explicit data boundaries.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WORKFLOW (AI-supported SEO/GEO process) ================= -->
+  <section aria-labelledby="workflow">
+    <div class="container">
+      <p class="eyebrow">The broader process</p>
+      <h2 id="workflow">How AI can support the SEO/GEO workflow</h2>
+
+      <div class="flow">
+        <div class="flow-step is-built">
+          <span class="n">Step 1</span>
+          <h3>Monitor visibility</h3>
+          <span class="role-tag ai">AI / automation</span>
+          <p>Connect DataForSEO's APIs — Google rankings, provider mention data, and prompt-based brand monitoring across four AI platforms — and organize the results for review.</p>
+          <span class="role-tag mine">Human role</span>
+          <p>Define the comparison scope and check data coverage and limitations.</p>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-step">
+          <span class="n">Step 2</span>
+          <h3>Identify opportunities</h3>
+          <span class="role-tag ai">AI support</span>
+          <p>Compare rankings and mentions against selected competitors to flag keyword and visibility gaps.</p>
+          <span class="role-tag mine">Human role</span>
+          <p>Validate the findings and prioritize by business relevance.</p>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-step">
+          <span class="n">Step 3</span>
+          <h3>Support content revision</h3>
+          <span class="role-tag ai">AI support</span>
+          <p>Research existing content and draft revision proposals based on reviewed opportunities.</p>
+          <span class="role-tag mine">Human role</span>
+          <p>Check evidence, brand fit, and accuracy before approving any change.</p>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-step">
+          <span class="n">Step 4</span>
+          <h3>Coordinate the cycle</h3>
+          <span class="role-tag ai">AI / automation</span>
+          <p>Connect recurring monitoring, analysis, review, and follow-up on a schedule.</p>
+          <span class="role-tag mine">Human role</span>
+          <p>Approve actions and assess results.</p>
+        </div>
+      </div>
+      <p class="footnote">Step 1 is implemented in this prototype. Steps 2–4 illustrate the proposed workflow.</p>
+    </div>
+  </section>
+
+  <!-- ================= VALIDATION ================= -->
+  <section aria-labelledby="validation">
+    <div class="container">
+      <p class="eyebrow">What validation established</p>
+      <h2 id="validation">What's live, what's simulated, what's not built</h2>
+      <p class="prose">The dashboard documents this field by field — an expandable "How these metrics are calculated" panel on each tab shows every value's source and formula, with worked examples for share of voice and prompt mention rate. What follows is the portfolio-level summary.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Field</th>
+              <th scope="col">Status</th>
+              <th scope="col">Source / dependency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Google rank position</th><td class="status-live">Live</td><td>DataForSEO SERP API</td></tr>
+            <tr><th scope="row">Prompt Monitoring (mentions, citations, history)</th><td class="status-live">Live</td><td>DataForSEO LLM Responses API — ChatGPT, Claude, Gemini, Perplexity. Wired and error-tested; a successful response is pending DataForSEO account funding. Saved tests and run history are stored in the visitor's browser only, not on a server</td></tr>
+            <tr><th scope="row">Brand Visibility Benchmark (mentions, share of voice)</th><td class="status-live">Live</td><td>DataForSEO LLM Mentions / Multi-Target Metrics API (provider dataset) — ChatGPT and Google AI Overview only</td></tr>
+            <tr><th scope="row">Brand Visibility Benchmark — historical trend</th><td class="status-live">Live</td><td>DataForSEO LLM Mentions Historical API — same two-platform limit; data from 2025-08-01 onward</td></tr>
+            <tr><th scope="row">AI search volume</th><td class="status-live">Live</td><td>DataForSEO AI Keyword Data API</td></tr>
+            <tr><th scope="row">Clicks / impressions / CTR</th><td class="status-demo">Demo data</td><td>Client Search Console data is intentionally excluded from this public portfolio</td></tr>
+            <tr><th scope="row">AI mention sentiment</th><td class="status-demo">Demo data</td><td>Illustrative sentiment values for this public demo</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="confidentiality-note">This public demo uses simulated traffic metrics to avoid exposing confidential client data. API-backed visibility fields are identified separately above.</p>
+    </div>
+  </section>
+
+
+</main>
+
+<footer>
+  <div class="container">
+    <small>Laura Wang · <a href="index.html" style="font-size:13px;min-height:0;display:inline">Portfolio</a></small>
+  </div>
+</footer>
+
+<script>
+  // Nav: scrolled shadow + mobile hamburger
+  (function () {
+    var nav = document.getElementById('nav');
+    var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 20); };
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+
+    var hamburger = document.getElementById('hamburger');
+    var mobileMenu = document.getElementById('mobile-menu');
+    hamburger.addEventListener('click', function () {
+      var isOpen = !mobileMenu.classList.contains('open');
+      mobileMenu.classList.toggle('open', isOpen);
+      hamburger.classList.toggle('open', isOpen);
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+    mobileMenu.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        mobileMenu.classList.remove('open');
+        hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+  })();
+</script>
+</body>
+</html>
