@@ -173,6 +173,23 @@
       .tldr > div { border-right: 0; }
     }
 
+    .bottom-line {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .bottom-line > div { padding: 24px 28px; }
+    .bottom-line > div:first-child { border-right: 1px solid var(--border); }
+    .bottom-line .bl-text { color: var(--ink); font-size: 1.0625rem; font-weight: 500; line-height: 1.5; margin-top: 8px; }
+    @media (max-width: 760px) {
+      .bottom-line { grid-template-columns: 1fr; }
+      .bottom-line > div:first-child { border-right: 0; border-bottom: 1px solid var(--border); }
+    }
+
     /* ---------- Core finding ---------- */
     .finding-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
     @media (max-width: 760px) { .finding-grid { grid-template-columns: 1fr; } }
@@ -351,6 +368,17 @@
           <span class="label">AI's role</span>
           <p class="tldr-head">Automates the checks</p>
           <p class="tldr-support">Scope calls and next steps stay with me.</p>
+        </div>
+      </div>
+
+      <div class="bottom-line">
+        <div>
+          <span class="label">Bottom line</span>
+          <p class="bl-text">Hold the channel split. This model is credible enough to size next quarter's total media budget — not yet to move money between channels on its estimate.</p>
+        </div>
+        <div>
+          <span class="label">Next step</span>
+          <p class="bl-text">Run a lift test on Google, the channel with the largest gap against its prior ROI (36.7%), then feed the result back into Meridian as an informative prior and re-run the optimiser.</p>
         </div>
       </div>
     </div>
